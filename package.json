@@ -18,7 +18,7 @@
     "test": "node --test",
     "seed:test:50b": "node scripts/seed-lab-state.cjs --50b",
     "audit:release": "node scripts/audit-release.cjs",
-    "dist": "electron-builder --win nsis"
+    "dist": "electron-builder --win nsis --publish never"
   },
   "dependencies": {
     "sql.js": "latest"

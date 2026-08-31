@@ -19,6 +19,12 @@ test('release metadata targets the private Windows repository and Ko-fi page', (
   assert.match(funding, /https:\/\/ko-fi\.com\/marukoshi/);
 });
 
+test('Windows packaging never triggers implicit GitHub publishing', () => {
+  const packageJson = JSON.parse(read('package.json'));
+
+  assert.match(packageJson.scripts.dist, /electron-builder --win nsis --publish never/);
+});
+
 test('README screenshot table references only existing documentation images', () => {
   const readme = read('README.md');
   const imagePaths = [...readme.matchAll(/(?:src|href)="(docs\/images\/[^"?#]+\.(?:png|gif))"/g)].map((match) => match[1]);
