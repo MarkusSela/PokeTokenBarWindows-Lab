@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: transparent;
+        color: #fff;
+        font:
+          12px system-ui,
+          sans-serif;
+        user-select: none;
+      }
+      #pet {
+        position: relative;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        cursor: grab;
+        touch-action: none;
+      }
+      #pet.dragging {
+        cursor: grabbing;
+      }
+      #sprite {
+        display: block;
+        width: calc(100% - 12px);
+        height: calc(100% - 28px);
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        image-rendering: pixelated;
+        filter: drop-shadow(0 2px 4px #000);
+        pointer-events: none;
+      }
+      #sprite.egg-motion {
+        animation: petEggPulse 1.5s steps(4, end);
+      }
+      #sprite.egg-continuous {
+        animation: petEggContinuous 1.1s ease-in-out infinite;
+      }
+      #effect {
+        position: absolute;
+        inset: 8px;
+        display: none;
+        border-radius: 50%;
+        background: radial-gradient(ellipse at center, rgba(255, 235, 120, 0.28) 0%, rgba(255, 235, 120, 0) 62%);
+        animation: mintGlow 0.9s ease-out both;
+        pointer-events: none;
+      }
+      #effect::before,
+      #effect::after {
+        position: absolute;
+        z-index: 2;
+        pointer-events: none;
+        content: "✨";
+        animation: mintSparkle 0.9s ease-out both;
+      }
+      #effect::before {
+        top: -6px;
+        left: 2px;
+        font-size: 20px;
+      }
+      #effect::after {
+        right: 0;
+        bottom: 4px;
+        font-size: 15px;
+        animation-delay: 0.08s;
+      }
+      @keyframes petEggPulse {
+        0%,
+        100% { transform: translateX(0) rotate(0); }
+        25% { transform: translateX(-3px) rotate(-2deg); }
+        50% { transform: translateX(3px) rotate(2deg); }
+        75% { transform: translateX(-2px) rotate(-1deg); }
+      }
+      @keyframes petEggContinuous {
+        0%,
+        100% { transform: translateY(0) rotate(-1deg); }
+        50% { transform: translateY(-3px) rotate(1deg); }
+      }
+      @keyframes mintSparkle {
+        0% { opacity: 0; transform: scale(0.35) rotate(-15deg); }
+        25% { opacity: 1; transform: scale(1.1) rotate(8deg); }
+        100% { opacity: 0; transform: scale(0.7) rotate(25deg); }
+      }
+      #bubble {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        max-width: calc(100% - 8px);
+        overflow: hidden;
+        padding: 4px 7px;
+        transform: translateX(-50%);
+        border: 1px solid #444;
+        border-radius: 8px;
+        background: #262626ef;
+        opacity: 0;
+        pointer-events: none;
+        text-overflow: ellipsis;
+        transition: opacity 0.15s;
+        white-space: nowrap;
+      }
+      #pet:hover #bubble {
+        opacity: 1;
+      }
+      #pet #bubble.visible {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="pet" aria-label="Floating Pokémon">
+      <img id="sprite" alt="Pokémon" />
+      <div id="effect" aria-hidden="true"></div>
+      <div id="bubble" aria-hidden="true"></div>
+    </div>
+    <script>
+      const pet = document.getElementById("pet");
+      const sprite = document.getElementById("sprite");
+      const effect = document.getElementById("effect");
+      const bubble = document.getElementById("bubble");
+      let activePointerId = null;
+      let pointerStart = null;
+      let didDrag = false;
+      let noticeTimer = null;
+      let effectTimer = null;
+      let eggTimer = null;
+      let eggPlaybackTimer = null;
+      let eggSessionKey = null;
+      let eggLastPulseAt = 0;
+      let eggStaticSprite = "assets/emerald-egg-static.png";
+      let eggAnimatedSprite = "assets/emerald-egg.webp";
+      const clickThresholdSquared = 16;
+
+      function eggPlan(snapshot) {
+        if (snapshot?.active || !snapshot?.egg) return { mode: "static", intervalMs: null };
+        const p = Math.max(0, Math.min(1, Number(snapshot.egg.progress) || 0));
+        if (p < 0.15) return { mode: "pulse", intervalMs: 300000 };
+        if (p < 0.30) return { mode: "pulse", intervalMs: 300000 };
+        if (p >= 0.90) return { mode: "continuous", intervalMs: 0 };
+        if (p >= 0.60) return { mode: "pulse", intervalMs: 60000 };
+        if (p >= 0.30) return { mode: "pulse", intervalMs: 180000 };
+        return { mode: "pulse", intervalMs: 300000 };
+      }
+
+      function stopEggMotion() {
+        clearTimeout(eggTimer);
+        clearTimeout(eggPlaybackTimer);
+        eggTimer = null;
+        eggPlaybackTimer = null;
+        sprite.classList.remove("egg-motion", "egg-continuous");
+      }
+
+      function playEggPulse() {
+        sprite.classList.remove("egg-motion");
+        void sprite.offsetWidth;
+        sprite.classList.add("egg-motion");
+        sprite.src = `${eggAnimatedSprite}?pulse=${Date.now()}`;
+        clearTimeout(eggPlaybackTimer);
+        eggPlaybackTimer = setTimeout(() => {
+          sprite.classList.remove("egg-motion");
+          sprite.src = eggStaticSprite;
+        }, 1500);
+      }
+
+      function syncEggMotion(snapshot) {
+        const egg = !snapshot?.active && snapshot?.egg;
+        if (!egg) {
+          stopEggMotion();
+          eggSessionKey = null;
+          return;
+        }
+        if (eggSessionKey === null) {
+          eggSessionKey = `${egg.tier || "initial"}`;
+          eggLastPulseAt = Date.now();
+          playEggPulse();
+        }
+        const plan = eggPlan(snapshot);
+        if (plan.mode === "continuous") {
+          clearTimeout(eggTimer);
+          clearTimeout(eggPlaybackTimer);
+          sprite.classList.remove("egg-motion");
+          sprite.classList.add("egg-continuous");
+          if (!sprite.src.includes(`${eggAnimatedSprite}?continuous`))
+            sprite.src = `${eggAnimatedSprite}?continuous=${Date.now()}`;
+          return;
+        }
+        sprite.classList.remove("egg-continuous");
+        clearTimeout(eggTimer);
+        const delay = Math.max(0, eggLastPulseAt + plan.intervalMs - Date.now());
+        eggTimer = setTimeout(() => {
+          playEggPulse();
+          eggLastPulseAt = Date.now();
+          syncEggMotion(snapshot);
+        }, delay);
+      }
+
+      function render(snapshot) {
+        const active = snapshot?.active || {};
+        const name = snapshot?.name || active.name || "Pokémon";
+        const tokens = snapshot?.tokens ?? snapshot?.usage?.today?.tokens ?? 0;
+        if (!snapshot?.active && snapshot?.egg) {
+          eggStaticSprite = snapshot?.sprite || eggStaticSprite;
+          eggAnimatedSprite = snapshot?.egg?.animatedSprite || eggAnimatedSprite;
+        }
+        sprite.src = snapshot?.sprite || "";
+        sprite.alt = name;
+        bubble.textContent = `${Number(tokens).toLocaleString("en-US")} tokens today`;
+        document.title = name;
+        syncEggMotion(snapshot);
+      }
+
+      function playPetEffect(kind) {
+        if (kind !== "sparkle") return;
+        clearTimeout(effectTimer);
+        effect.style.display = "none";
+        void effect.offsetWidth;
+        effect.style.display = "block";
+        effectTimer = setTimeout(() => {
+          effect.style.display = "none";
+        }, 900);
+      }
+
+      function showNotice(text) {
+        bubble.textContent = String(text || "");
+        bubble.classList.toggle("visible", Boolean(text));
+        clearTimeout(noticeTimer);
+        if (text) {
+          noticeTimer = setTimeout(() => {
+            bubble.classList.remove("visible");
+          }, 3500);
+        }
+      }
+
+      function finishDrag(event, openAfterClick = false) {
+        if (activePointerId !== event.pointerId) return;
+        const shouldOpen = openAfterClick && !didDrag;
+        activePointerId = null;
+        pet.classList.remove("dragging");
+        if (pet.hasPointerCapture?.(event.pointerId)) {
+          pet.releasePointerCapture(event.pointerId);
+        }
+        window.ptb.endPetDrag(event.screenX, event.screenY);
+        pointerStart = null;
+        didDrag = false;
+        event.preventDefault();
+        if (shouldOpen) window.ptb.openMain();
+      }
+
+      pet.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || activePointerId !== null) return;
+        activePointerId = event.pointerId;
+        pointerStart = { x: event.screenX, y: event.screenY };
+        didDrag = false;
+        pet.classList.add("dragging");
+        pet.setPointerCapture?.(event.pointerId);
+        window.ptb.startPetDrag(event.screenX, event.screenY);
+        event.preventDefault();
+      });
+
+      pet.addEventListener("pointermove", (event) => {
+        if (activePointerId !== event.pointerId) return;
+        const dx = event.screenX - pointerStart.x;
+        const dy = event.screenY - pointerStart.y;
+        if (dx * dx + dy * dy > clickThresholdSquared) didDrag = true;
+        window.ptb.movePet(event.screenX, event.screenY);
+        event.preventDefault();
+      });
+
+      pet.addEventListener("pointerup", (event) => finishDrag(event, true));
+      pet.addEventListener("pointercancel", finishDrag);
+      pet.addEventListener("lostpointercapture", (event) => {
+        if (activePointerId === event.pointerId) finishDrag(event);
+      });
+
+      pet.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        if (activePointerId === null) window.ptb.petContext();
+      });
+
+      window.ptb.onSnapshot(render);
+      window.ptb.onPetNotice(showNotice);
+      window.ptb.onPetEffect(playPetEffect);
+      window.ptb.snapshot().then(render);
+    </script>
+  </body>
+</html>

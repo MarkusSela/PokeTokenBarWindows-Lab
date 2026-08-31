@@ -1,0 +1,65 @@
+{
+  "name": "poketokenbar-windows-lab",
+  "version": "0.1.0",
+  "description": "PokeTokenBar Windows Lab — independent Windows tray companion",
+  "author": "PokeTokenBar Windows Lab contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MarkusSela/PokeTokenBarWindows-Lab.git"
+  },
+  "homepage": "https://github.com/MarkusSela/PokeTokenBarWindows-Lab",
+  "bugs": {
+    "url": "https://github.com/MarkusSela/PokeTokenBarWindows-Lab/issues"
+  },
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test",
+    "seed:test:50b": "node scripts/seed-lab-state.cjs --50b",
+    "audit:release": "node scripts/audit-release.cjs",
+    "dist": "electron-builder --win nsis"
+  },
+  "dependencies": {
+    "sql.js": "latest"
+  },
+  "devDependencies": {
+    "electron": "44.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.poketokenbar.windows.lab",
+    "productName": "PokeTokenBar Windows Lab",
+    "icon": "build/icon.ico",
+    "extraResources": [
+      {
+        "from": "assets/app-icon.png",
+        "to": "app-icon.png"
+      }
+    ],
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "index.html",
+      "floating.html",
+      "gold.html",
+      "assets/**",
+      "!assets/.test-cache/**",
+      "!assets/pokeapi-cache/**",
+      "core/**",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "PokeTokenBar Windows Lab",
+      "artifactName": "PokeTokenBar-Windows-Lab-Setup-${version}.exe"
+    }
+  }
+}

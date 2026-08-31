@@ -1,0 +1,38 @@
+# Node / Electron
+node_modules/
+.npm/
+__pycache__/
+*.pyc
+
+# Local app data and credentials
+.env
+.env.*
+*.pem
+*.p12
+*.pfx
+*.key
+
+# Runtime state, caches and logs
+companion-state*.json
+pokeapi-cache/
+assets/.test-cache/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite*
+*.tmp
+*.log
+
+# Build output and builder diagnostics
+dist/
+dist-final/
+dist-final-*/
+release/
+builder-debug.yml
+*.blockmap
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

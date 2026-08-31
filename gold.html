@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: transparent; }
+    #gold-scene { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+    #gold { position: absolute; display: block; pointer-events: none; object-fit: contain; transform-origin: center center; }
+  </style>
+</head>
+<body>
+  <div id="gold-scene"><img id="gold" alt="Gold cammina con il suo Pokémon"></div>
+  <script>
+    const image = document.getElementById('gold');
+    let config = null;
+    let cycle = 0;
+    let frame = 0;
+    let timeout = null;
+    const sleep = (ms) => new Promise(resolve => {
+      timeout = setTimeout(resolve, ms);
+    });
+    function cancelMotion() {
+      cycle += 1;
+      cancelAnimationFrame(frame);
+      clearTimeout(timeout);
+      timeout = null;
+      image.style.display = 'none';
+    }
+    function randomBetween(min, max) {
+      return min + Math.random() * Math.max(0, max - min);
+    }
+    function moveTo(x, target, duration, token) {
+      return new Promise(resolve => {
+        const started = performance.now();
+        const tick = now => {
+          if (token !== cycle) return resolve(false);
+          const progress = Math.min(1, (now - started) / duration);
+          image.style.left = `${x + (target - x) * progress}px`;
+          if (progress >= 1) return resolve(true);
+          frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+      });
+    }
+    async function runCycle() {
+      const token = ++cycle;
+      const current = config;
+      if (!current?.enabled) return;
+      const width = Math.max(72, Math.round(Number(current.size) * 2.95));
+      const height = Math.max(52, Math.round(width * 357 / 500));
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const direction = Math.random() < 0.5 ? -1 : 1;
+      const maxTop = Math.max(0, viewportHeight - height);
+      const top = Math.round(randomBetween(Math.round(viewportHeight * 0.08), Math.max(Math.round(viewportHeight * 0.12), maxTop * 0.82)));
+      const start = direction > 0 ? -width : viewportWidth;
+      const stops = direction > 0
+        ? [viewportWidth * 0.24, viewportWidth * 0.55, viewportWidth * 0.80, viewportWidth]
+        : [viewportWidth * 0.76 - width, viewportWidth * 0.45 - width, viewportWidth * 0.20 - width, -width];
+      image.style.width = `${width}px`;
+      image.style.height = `${height}px`;
+      image.style.top = `${top}px`;
+      image.style.left = `${start}px`;
+      image.style.transform = direction > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+      image.src = `assets/gold-companion-walking.gif?cycle=${Date.now()}`;
+      image.style.display = 'block';
+      let x = start;
+      for (const [index, target] of stops.entries()) {
+        const duration = [1600, 2200, 2200, 1600][index];
+        if (!await moveTo(x, target, duration, token)) return;
+        x = target;
+        if (index < 3) {
+          await sleep(800);
+          if (token !== cycle) return;
+        }
+      }
+      image.style.display = 'none';
+      await sleep(Math.round(randomBetween(800, 2200)));
+      if (token === cycle && config?.enabled) runCycle();
+    }
+    function apply(next) {
+      config = { ...next, size: Math.max(24, Math.min(128, Number(next?.size) || 76)) };
+      cancelMotion();
+      if (config.enabled) runCycle();
+    }
+    window.ptb.onGoldConfig(apply);
+  </script>
+</body>
+</html>
