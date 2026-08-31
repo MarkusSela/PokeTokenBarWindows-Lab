@@ -2,7 +2,7 @@
   <img src="assets/app-icon.png" width="144" alt="PokeTokenBar app icon">
 </p>
 
-<h1 align="center">PokeTokenBar</h1>
+<h1 align="center">PokeTokenBar for Win</h1>
 
 <p align="center">
   <strong>Turn local AI coding usage into Pokémon progress.</strong><br>
