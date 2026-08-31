@@ -1,70 +1,176 @@
-# PokeTokenBar Windows Lab
+<p align="center">
+  <img src="assets/app-icon.png" width="144" alt="PokeTokenBar app icon">
+</p>
 
-<img src="assets/app-icon.png" width="128" alt="PokeTokenBar Windows Lab icon">
+<h1 align="center">PokeTokenBar</h1>
 
-[![CI](https://github.com/MarkusSela/PokeTokenBarWindows-Lab/actions/workflows/ci.yml/badge.svg)](https://github.com/MarkusSela/PokeTokenBarWindows-Lab/actions/workflows/ci.yml)
-[![Latest release](https://img.shields.io/github/v/release/MarkusSela/PokeTokenBarWindows-Lab?display_name=tag)](https://github.com/MarkusSela/PokeTokenBarWindows-Lab/releases)
-[![Ko-fi](https://img.shields.io/badge/Support%20future%20ports-Ko--fi-ff5e5b)](https://ko-fi.com/marukoshi)
-[![License](https://img.shields.io/badge/license-MIT-2ea44f)](LICENSE)
+<p align="center">
+  <strong>Turn local AI coding usage into Pokémon progress.</strong><br>
+  A quiet tray companion that turns everyday development into a small collection game.
+</p>
 
-**Your local AI coding usage, hatched into a Pokémon companion — right in the Windows notification area.**
+<p align="center">
+  <a href="https://github.com/MarkusSela/PokeTokenBarWindows-Lab/actions/workflows/ci.yml"><img src="https://github.com/MarkusSela/PokeTokenBarWindows-Lab/actions/workflows/ci.yml/badge.svg" alt="Build status"></a>
+  <a href="https://github.com/MarkusSela/PokeTokenBarWindows-Lab/releases"><img src="https://img.shields.io/github/v/release/MarkusSela/PokeTokenBarWindows-Lab?display_name=tag&label=release" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2ea44f" alt="MIT license"></a>
+</p>
 
-PokeTokenBar Windows Lab is an independent Windows companion inspired by the original [PokeTokenBar macOS project](https://github.com/chattymin/PokeTokenBar). It keeps the same idea — local AI coding usage becomes a small companion that hatches, evolves, graduates, and fills a Pokédex — while translating the menu-bar experience into a Windows-first tray application.
+> **Current release: v0.1.0**
 
-> **Private preview:** this repository and its first release are intentionally private while the Windows build is reviewed. Do not share its release links until the repository is made public.
+## About this project
 
-## What it does
+PokeTokenBar is an independent desktop companion inspired by the original [PokeTokenBar project](https://github.com/chattymin/PokeTokenBar). This repository contains the Windows build, with the same simple idea at its centre: local AI coding usage becomes an egg, then a companion, then a growing Pokédex.
 
-- Lives in the Windows notification area with a static, high-resolution app icon.
-- Opens a compact Home popover from the tray without adding a separate taskbar button.
-- Reads supported local usage data without modifying provider databases or logs.
-- Tracks daily, weekly, monthly, and rolling-window local usage where the source provides it.
-- Turns accumulated usage into an egg, an active companion, evolution stages, a Pokédex, and a Catch Log.
-- Includes a Shop and Bag for the companion progression loop.
-- Supports optional floating companion and walking overlay windows, both excluded from the taskbar.
-- Includes an optional Gold walking overlay, controlled from Settings and kept outside the taskbar.
-- Supports read-only additional scan folders selected by the user.
-- Stores only the companion state in its own Windows application-data directory.
-- Never requires a server, SSH, Tailscale, Home Assistant, or a remote usage service.
+The app stays in the notification area and opens a compact Home panel when you need it. Your provider data remains on the machine, while the companion keeps its own progression state separately.
 
-## Screenshots
+## ✨ What it does
 
-All images below are **demo captures or neutral illustrations** made with synthetic values. They must never contain a Windows username, home path, prompt, credential, real usage total, real cost, database name, or personal project name.
+- 🥚 **Turns usage into progress:** local usage feeds the active egg, which can hatch, evolve, and graduate.
+- 📊 **Shows the numbers that matter:** see daily, weekly, monthly, and rolling usage when the source provides it.
+- 📚 **Builds a collection:** keep graduated companions in the Pokédex and review each individual in the Catch Log.
+- 🛍️ **Adds a small reward loop:** use the Shop and Bag for eggs, Rare Candy, Mints, and other progression items.
+- 🫧 **Stays out of the way:** open Home from the tray or keep an optional floating companion on screen without adding another taskbar button.
+- 📁 **Accepts extra local sources:** add JSON or JSONL folders when a tool stores usage outside the built-in locations.
+- 🔒 **Keeps the boundary clear:** provider data is read-only, and the app does not need a server, SSH, Tailscale, Home Assistant, or a remote usage service.
 
-<table>
-  <tr>
-    <th>Home and tray</th>
-    <th>Companion windows</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/images/screenshot-home.png" width="420" alt="Home popover with synthetic local usage and companion"></td>
-    <td align="center"><img src="docs/images/tray-and-popover.png" width="460" alt="Neutral illustrative Windows tray and taskbar-safe popover preview"></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/images/screenshot-collection-pokedex.png" width="300" alt="Pokédex grid with synthetic collected entries"><br><br><img src="docs/images/screenshot-collection-catchlog.png" width="300" alt="Catch Log with synthetic dates and natures"></td>
-    <td align="center"><img src="docs/images/floating-pet.png" width="153" alt="Static floating companion capture"><br><br><img src="docs/images/shiny-banner.png" width="340" alt="Shiny companion state"></td>
-  </tr>
-  <tr>
-    <td colspan="2" align="center"><img src="assets/gold-companion-walking.gif" width="340" alt="Optional Gold walking overlay"></td>
-  </tr>
-  <tr>
-    <th colspan="2">Settings and progression</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/images/settings.png" width="300" alt="Settings with tray behavior and privacy controls"></td>
-    <td align="center"><img src="docs/images/screenshot-scan-folders.png" width="300" alt="Advanced settings with a synthetic additional scan folder"></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/images/screenshot-bag.png" width="300" alt="Bag with synthetic Rare Candy and Mint inventory"></td>
-    <td align="center"><img src="docs/images/screenshot-shop.png" width="300" alt="Shop with synthetic progression item prices"></td>
-  </tr>
+## 🔁 How progression works
+
+1. The app reads supported usage metadata locally.
+2. New usage advances the active egg.
+3. The egg hatches into a Pokémon selected from the built-in catalogue.
+4. More progress unlocks evolution stages and eventually graduates the companion.
+5. The Pokédex and Catch Log keep the local collection history.
+
+The progression state belongs to PokeTokenBar. It does not write back to Hermes or to any provider source.
+
+## 📸 Screenshots
+
+The screenshots below use synthetic values and neutral demo paths. Each image sits beside an explanation of what the screen is for. They are documentation assets, not captures of a personal account or desktop.
+
+<table class="screenshot-table">
+  <thead>
+    <tr>
+      <th width="40%">Screenshot</th>
+      <th align="left">What it shows</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">
+        <img src="docs/images/screenshot-home.png" width="330" alt="Home panel with synthetic usage and companion progress"><br>
+        <strong>🏠 Home</strong>
+      </td>
+      <td class="screenshot-explanation">
+        <strong>The place to start.</strong><br>
+        Home brings the active egg or Pokémon, progress toward the next stage, usage totals, provider details, and the limits status into one compact panel. It opens from the tray and does not create a second taskbar button.
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/images/tray-and-popover.png" width="420" alt="Illustration of the notification-area icon and Home panel"><br>
+        <strong>📍 Tray access</strong>
+      </td>
+      <td class="screenshot-explanation">
+        <strong>A tray-first desktop flow.</strong><br>
+        This is a neutral illustration of the entry point. The notification-area icon opens Home, the context menu can refresh or quit, and closing the panel leaves PokeTokenBar running quietly in the tray.
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/images/screenshot-shop.png" width="275" alt="Shop with synthetic progression item prices"><br>
+        <strong>🛍️ Shop</strong>
+      </td>
+      <td class="screenshot-explanation">
+        <strong>A place to spend progression tokens.</strong><br>
+        Shop offers optional items such as a fresh egg, Rare Egg, Mint, Rare Candy, and Shiny Charm. Prices in the screenshot are demonstration values, not billing data or an account wallet.
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/images/screenshot-bag.png" width="275" alt="Bag with synthetic Rare Candy and Mint inventory"><br>
+        <strong>🎒 Bag</strong>
+      </td>
+      <td class="screenshot-explanation">
+        <strong>Use what you have earned.</strong><br>
+        Bag keeps the local item inventory in view and makes each action explicit. The counts shown here are synthetic and do not represent a real purchase history.
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/images/screenshot-collection-pokedex.png" width="275" alt="Pokédex grid with synthetic collected entries"><br>
+        <strong>📖 Pokédex</strong>
+      </td>
+      <td class="screenshot-explanation">
+        <strong>See the collection at a glance.</strong><br>
+        The Pokédex records discovered stages, rarity filters, shiny ownership, and the representative Pokémon shown in the tray or floating companion. Selecting a species changes the companion display, not provider data.
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/images/screenshot-collection-catchlog.png" width="275" alt="Catch Log with synthetic dates and natures"><br>
+        <strong>🗂️ Catch Log</strong>
+      </td>
+      <td class="screenshot-explanation">
+        <strong>Keep each companion's story.</strong><br>
+        Catch Log separates the active companion from graduated ones and shows the evolution chain, rarity, nature, and neutral demonstration dates for each individual.
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/images/settings.png" width="195" alt="Settings with general, tray, companion, update, and support controls">
+        <img src="docs/images/screenshot-scan-folders.png" width="195" alt="Advanced settings with a synthetic additional scan folder"><br>
+        <strong>⚙️ Settings & progression</strong>
+      </td>
+      <td class="screenshot-explanation">
+        <strong>The two Settings images belong together.</strong>
+        <ul>
+          <li><strong>General:</strong> choose the language, refresh cadence, limit display, launch-at-login behavior, and representative Pokémon.</li>
+          <li><strong>Tray:</strong> decide which daily totals and limit details appear in the tray tooltip.</li>
+          <li><strong>Companion:</strong> show or hide the floating pet, adjust its size, and enable the optional Gold walking overlay.</li>
+          <li><strong>Updates:</strong> choose whether to receive update notices and check the release page.</li>
+          <li><strong>Advanced scan:</strong> add extra JSON or JSONL folders. The `C:\Demo\AI-Logs` path is a synthetic example; these folders are read-only.</li>
+        </ul>
+        These controls change PokeTokenBar's own settings and progression display. They never modify Hermes or another provider's files.
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/images/floating-pet.png" width="153" alt="Static floating companion window"><br>
+        <strong>🫧 Floating companion</strong>
+      </td>
+      <td class="screenshot-explanation">
+        <strong>A separate companion window.</strong><br>
+        The optional pet can remain visible while Home is closed. It is transparent, excluded from the taskbar, and follows the selected representative without moving or resizing during a usage refresh.
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="docs/images/shiny-banner.png" width="275" alt="Shiny companion state"><br>
+        <strong>✨ Shiny state</strong>
+      </td>
+      <td class="screenshot-explanation">
+        <strong>A rare result with its own visual language.</strong><br>
+        This banner shows how the app presents a shiny companion and its notification moment. It is a static, synthetic documentation state.
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="assets/gold-companion-walking.gif" width="275" alt="Optional Gold walking overlay"><br>
+        <strong>🚶 Gold walking overlay</strong>
+      </td>
+      <td class="screenshot-explanation">
+        <strong>An optional ambient animation.</strong><br>
+        Gold and his Pokémon can cross the screen independently from Home. The overlay is opt-in, has its own size control, and remains outside the taskbar.
+      </td>
+    </tr>
+  </tbody>
 </table>
 
-The tray image is intentionally a safe documentation illustration rather than a capture of the user's real taskbar. The screenshot capture policy and exact acceptance list are documented in [`docs/SCREENSHOTS.md`](docs/SCREENSHOTS.md).
+See [`docs/SCREENSHOTS.md`](docs/SCREENSHOTS.md) for the complete image index and the rules used to keep documentation data anonymous.
 
-## Supported local sources
+## 🔌 Local sources
 
-The reader checks for each source independently and silently skips sources that are not installed. Current adapters cover:
+The app checks each source independently and skips locations that are not installed. The built-in readers currently cover:
 
 - Claude Code
 - Gemini CLI
@@ -78,40 +184,42 @@ The reader checks for each source independently and silently skips sources that 
 - Pi Agent
 - Hermes Agent local SQLite usage
 
-The app reads only usage metadata needed for totals and attribution. It does not need prompts or message bodies. Hermes data is opened read-only and remains compatible with a live SQLite WAL database; the database is never changed by this app.
+PokeTokenBar reads the usage metadata needed for totals and attribution. It does not need prompts or message bodies. Hermes data is opened read-only and remains compatible with a live SQLite WAL database.
 
-Official account quota values are shown only when a supported local source exposes them. Windows local-source usage is still useful when official limits are unavailable; the UI labels that distinction instead of inventing percentages or reset times.
+Official quota values appear only when a local source provides them. If that data is unavailable, the interface says so instead of inventing a percentage or reset time.
 
-## Privacy and local data
+## 🔒 Privacy and local data
 
-PokeTokenBar Windows Lab is deliberately local-first:
+PokeTokenBar is designed around local data:
 
 - no telemetry or analytics service;
 - no upload of usage data;
 - no remote database;
 - no SSH, Tailscale, or Home Assistant dependency;
 - provider databases and log files are read-only;
-- prompts, credentials, API keys, tokens, cookies, and connection strings are not stored in the project or release;
-- the app's own progression state is stored outside the repository under the normal Windows application-data directory;
-- an optional export is a user action and must be treated as private data.
+- prompts, credentials, API keys, tokens, cookies, and connection strings are not stored in the repository or release assets;
+- the companion's own progression state stays outside the repository in the normal application-data directory;
+- an export is an explicit user action and should be treated as personal data.
 
-The release audit rejects personal absolute paths, credential-looking values, local database files, logs, and companion state. See [`SECURITY.md`](SECURITY.md) and [`RELEASE.md`](RELEASE.md).
+The release audit rejects personal absolute paths, credential-looking values, local database files, logs, and companion state. More detail is available in [`SECURITY.md`](SECURITY.md) and [`RELEASE.md`](RELEASE.md).
 
-## Install the private preview
+## 📦 Install
 
-1. Open the private [Releases page](https://github.com/MarkusSela/PokeTokenBarWindows-Lab/releases).
-2. Download the Windows installer, named `PokeTokenBar-Windows-Lab-Setup-<version>.exe`.
-3. Verify the SHA-256 value in `SHA256SUMS.txt` before installing.
-4. Run the installer. The app starts tray-first; click the notification-area icon to open Home.
+The current release is `v0.1.0`.
 
-The preview installer may be unsigned. Windows SmartScreen can show a warning for an unsigned private build. Only install an artifact downloaded from the private repository or built locally from this source.
+1. Open the [Releases page](https://github.com/MarkusSela/PokeTokenBarWindows-Lab/releases).
+2. Download `PokeTokenBar-Windows-Lab-Setup-<version>.exe`.
+3. Verify the SHA-256 value with the attached `SHA256SUMS.txt`.
+4. Run the installer. PokeTokenBar starts in the notification area; click its icon to open Home.
 
-## Build from source
+The current installer is not Authenticode-signed, so Windows SmartScreen may display a warning. Check the release source and checksum before installing.
+
+## 🧰 Build from source
 
 Requirements:
 
 - Windows 10 or 11
-- Node.js 22 or newer, matching the version used by CI
+- Node.js 22 or newer
 - npm
 
 ```shell
@@ -124,50 +232,45 @@ npm run dist
 
 The installer is written to `dist/PokeTokenBar-Windows-Lab-Setup-<version>.exe`. The unpacked application is written to `dist/win-unpacked/`.
 
-For a clean verification run, close every previous PokeTokenBar Windows Lab process before rebuilding. The normal launch path is tray-first; diagnostic opening is available only through the documented `PTB_OPEN=1` test path.
+For a clean verification run, close previous PokeTokenBar processes before rebuilding. The normal launch path stays tray-first; diagnostic opening is reserved for the documented `PTB_OPEN=1` test path.
 
-## Release policy
+## 🤝 Contributing
 
-The Windows release is kept separate from the macOS repository. The recommended GitHub release contains only:
+Issues and pull requests are welcome. Please:
 
-- the NSIS installer `.exe`;
-- `SHA256SUMS.txt`;
-- a short release note with tested version, test count, audit result, and known unsigned-installer warning.
+- describe the smallest reproducible steps;
+- use synthetic data whenever possible;
+- do not attach provider logs, Hermes databases, prompts, credentials, cookies, or exported saves;
+- preserve the tray-first lifecycle and the read-only provider boundary.
 
-Do not upload:
+Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) for the local test workflow.
 
-- `companion-state.json` or any exported save;
-- Hermes `state.db`, WAL/SHM files, provider logs, caches, prompts, or screenshots from a personal machine;
-- `.env`, certificates, keys, tokens, credentials, or connection strings;
-- `node_modules/`, diagnostic output, or personal build directories.
+## 🔗 Links
 
-The detailed checklist is [`RELEASE.md`](RELEASE.md). The first publication is a private preview; public visibility is a separate decision after review.
+- [Project repository](https://github.com/MarkusSela/PokeTokenBarWindows-Lab)
+- [Releases](https://github.com/MarkusSela/PokeTokenBarWindows-Lab/releases)
+- [Report an issue](https://github.com/MarkusSela/PokeTokenBarWindows-Lab/issues/new)
+- [Original PokeTokenBar project](https://github.com/chattymin/PokeTokenBar)
 
-## Links
+## 💛 Support
 
-- **Windows repository:** [MarkusSela/PokeTokenBarWindows-Lab](https://github.com/MarkusSela/PokeTokenBarWindows-Lab)
-- **Windows releases:** [Releases](https://github.com/MarkusSela/PokeTokenBarWindows-Lab/releases)
-- **Issues:** [Report a problem](https://github.com/MarkusSela/PokeTokenBarWindows-Lab/issues/new)
-- **Original macOS project:** [chattymin/PokeTokenBar](https://github.com/chattymin/PokeTokenBar)
-- **Support future ports:** [Ko-fi](https://ko-fi.com/marukoshi)
+If PokeTokenBar is useful to you, you can support its maintenance on [Ko-fi](https://ko-fi.com/marukoshi). Support helps with upkeep, testing, and interface polish. It does not unlock features, and it never sends usage data anywhere.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
-Thank you to the original PokeTokenBar project for the companion concept, progression loop, and reference behavior that inspired this Windows implementation.
+Thanks to the original [PokeTokenBar project](https://github.com/chattymin/PokeTokenBar) for the companion concept and progression loop that inspired this build.
 
-This project also relies on the work of:
+This project also uses:
 
 - [Electron](https://www.electronjs.org/) for the desktop runtime;
-- [PokéAPI](https://pokeapi.co/) and the [PokéAPI sprites repository](https://github.com/PokeAPI/sprites) for runtime Pokémon data and imagery;
-- the open-source maintainers of the local AI tools whose usage formats make read-only aggregation possible;
-- everyone who tests the private preview and reports reproducible issues without including private logs or credentials.
+- [PokéAPI](https://pokeapi.co/) and the [PokéAPI sprites repository](https://github.com/PokeAPI/sprites) for Pokémon data and imagery;
+- the maintainers of the local AI tools whose usage formats make read-only aggregation possible;
+- the testers and issue reporters who provide reproducible feedback without sharing private logs or credentials.
 
-Donations through [Ko-fi](https://ko-fi.com/marukoshi) help fund maintenance and future companion apps for **Windows, iOS, Android, Linux, and other platforms**. A donation is optional and does not unlock features or send usage data anywhere.
+## 📄 License
 
-## License and disclaimer
+The source code in this repository is released under the [MIT License](LICENSE). The license applies to this project's source code and does not grant rights to third-party trademarks, artwork, or data accessed through the app.
 
-The original source code in this repository is released under the [MIT License](LICENSE). The license applies to this project's source code and does not grant rights to third-party trademarks, artwork, or data accessed through the app.
+PokeTokenBar is an unofficial, non-commercial fan project. It is not affiliated with, endorsed, sponsored, or approved by Nintendo, Game Freak, Creatures Inc., or The Pokémon Company. "Pokémon" and related names, characters, and imagery belong to their respective owners.
 
-PokeTokenBar Windows Lab is an unofficial, non-commercial fan project. It is not affiliated with, endorsed, sponsored, or approved by Nintendo, Game Freak, Creatures Inc., or The Pokémon Company. “Pokémon” and related names, characters, and imagery belong to their respective owners.
-
-The application is provided “as is”, without warranty of any kind. This notice is not legal advice.
+The application is provided "as is", without warranty of any kind. This notice is not legal advice.

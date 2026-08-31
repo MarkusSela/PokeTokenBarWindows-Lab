@@ -1,32 +1,66 @@
-# Screenshot inventory and privacy rules
+# Screenshot index and privacy rules
 
-The README follows the visual inventory of the original PokeTokenBar project, adapted for Windows.
+This page documents the images used by the release README. Each screenshot is paired with the feature it explains. The images are documentation assets, not account screenshots.
 
-## Required demo captures
+## Visual index
 
-| File | What it should show | Privacy requirements |
-| --- | --- | --- |
-| `screenshot-home.png` | Home popover, synthetic provider rows, egg or active companion, local-only limit notice | No real totals, costs, provider paths, username, or taskbar identity |
-| `tray-and-popover.png` | Neutral illustration of the Windows notification-area icon and opened Home popover | Must be visibly labelled as an illustration; do not capture unrelated tray icons, clock, notifications, or personal app names |
-| `floating-pet.png` | Static capture of the floating companion window | Synthetic Pokémon state only; no desktop content behind it |
-| `shiny-banner.png` | Static capture of a shiny companion state | No account data or real event history |
-| `screenshot-collection-pokedex.png` | Pokédex grid with synthetic collected entries | No real catch dates or exported state |
-| `screenshot-collection-catchlog.png` | Catch Log with synthetic dates and natures | Use neutral demo dates and names only |
-| `settings.png` | Settings sections, update check, privacy controls, tray behavior options | No selected personal folders; no user name in path text |
-| `screenshot-bag.png` | Bag with Rare Candy, Mint, and synthetic inventory counts | No real wallet or purchase history |
-| `screenshot-shop.png` | Shop items and synthetic prices | Prices are demo UI values, not account data |
-| `screenshot-scan-folders.png` | Settings → Advanced → additional scan folders | Show a demo path such as `C:\Demo\AI-Logs`; never show a real path |
+| Screenshot | Feature | Description | Data policy |
+| --- | --- | --- | --- |
+| `screenshot-home.png` | Home | The compact Home panel combines the active companion, progress, daily and period usage, provider details, and the limits status. | Synthetic rows, totals, and companion progress only. |
+| `tray-and-popover.png` | Tray access | The notification-area icon opens Home without a separate taskbar button. Closing Home leaves the app resident in the tray. | Neutral illustration with no unrelated tray icons, clock, notifications, or personal app names. |
+| `screenshot-shop.png` | Shop | Usage progress can be exchanged for optional eggs, Rare Candy, Mint, and Shiny Charm items. | Demonstration prices only. No wallet, billing, or account balance. |
+| `screenshot-bag.png` | Bag | The local inventory shows purchased items and the explicit actions available for the active companion. | Synthetic item counts only. |
+| `screenshot-collection-pokedex.png` | Pokédex | The collection records discovered stages, rarity filters, shiny ownership, and the representative Pokémon used by the companion. | Synthetic species and collection state. |
+| `screenshot-collection-catchlog.png` | Catch Log | The history view separates the active companion from graduated ones and keeps each evolution chain, nature, rarity, and date together. | Neutral demonstration dates and names only. |
+| `settings.png` + `screenshot-scan-folders.png` | Settings and progression | The two images belong together: the first shows the main controls, while the second shows the advanced read-only scan-folder area. | `C:\Demo\AI-Logs` is a synthetic path. No personal folders or source databases are used. |
+| `floating-pet.png` | Floating companion | The optional companion window can stay visible independently from Home and outside the taskbar. | Static synthetic Pokémon state with no surrounding desktop content. |
+| `shiny-banner.png` | Shiny state | A shiny companion receives a distinct visual treatment and notification moment. | Static synthetic state only. |
+| `assets/gold-companion-walking.gif` | Gold overlay | The optional Gold animation crosses the screen independently from Home and remains disabled until selected in Settings. | Bundled project artwork, not a desktop capture. |
+
+## Settings and progression
+
+The Settings pair is intentionally kept in one README row so the reader can see the control surface and its advanced scan section together.
+
+### General controls
+
+- **Language** selects the interface language.
+- **Refresh interval** chooses a periodic refresh from one to fifteen minutes, or manual refresh.
+- **Limit display** chooses used or remaining values when official quota data is available.
+- **Launch at login** controls startup behavior.
+- **Representative Pokémon** selects the collected species shown in the tray and floating companion.
+
+### Tray and companion controls
+
+The tray tooltip can independently show today's tokens, today's cost, and official limit percentages. The floating companion can be enabled, hidden, and resized. The optional Gold walking overlay has its own toggle and size control.
+
+### Updates and support
+
+Settings includes an explicit update check, an update-notification preference, a project link, an issue link, and the Ko-fi support link. Local usage aggregation does not depend on a remote service.
+
+### Advanced scan folders
+
+Additional folders are selected explicitly and read in JSON/JSONL counter-only mode. The app does not write to those folders, does not modify Hermes or provider databases, and does not need prompt or message bodies.
 
 ## Capture method
 
-Prefer the packaged app launched with an isolated temporary state directory and isolated empty provider roots. If a real desktop capture is necessary, create a clean Windows user/profile or crop and redact the entire surrounding desktop before saving.
+Prefer the packaged app launched with an isolated temporary state directory and isolated empty provider roots. If a desktop capture is necessary, use a clean Windows profile or crop and redact the entire surrounding desktop before saving.
 
 Before adding an image:
 
-1. inspect every visible pixel for usernames, home paths, clock/notification content, window titles, account values, and personal project names;
-2. confirm the file is under `docs/images/`, not `assets/`;
-3. confirm the image is excluded from the packaged application;
-4. record that it was generated with synthetic values;
-5. remove the temporary demo profile and any untracked capture files outside `docs/images/`.
+1. inspect every visible pixel for usernames, home paths, clock and notification content, window titles, account values, and personal project names;
+2. confirm the file is under `docs/images/`, except for the bundled Gold animation under `assets/`;
+3. confirm documentation-only images are excluded from the packaged application;
+4. record that the image uses synthetic values;
+5. remove temporary demo profiles and untracked capture files outside the intended asset path.
 
-Never use the user's live Hermes database or provider logs to produce a screenshot.
+Never use the live Hermes database or provider logs to produce a screenshot. Documentation images must not contain credentials, API keys, tokens, cookies, connection strings, or personal machine paths.
+
+## README layout rule
+
+Keep this relationship intact:
+
+- one visual screenshot cell per feature explanation;
+- the two Settings screenshots grouped in one visual cell with one detailed explanation beside them;
+- the tray image labelled as an illustration;
+- the Gold walking asset described as optional;
+- all values described as synthetic unless the item is a static bundled asset.

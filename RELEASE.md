@@ -1,14 +1,13 @@
-# Windows release checklist
+# Release checklist
 
 This document describes the controlled release process for `MarkusSela/PokeTokenBarWindows-Lab`.
 
 ## Release principles
 
-- The first release is a **private preview**.
-- The macOS repository remains untouched and is referenced only as upstream inspiration.
+- Every tagged version is a complete release with a clear version number.
+- The Windows implementation remains separate from the original macOS repository.
 - No credentials, database, local state, logs, prompts, caches, or personal paths enter Git or release assets.
-- The release is an installer plus a checksum file, not a dump of the development directory.
-- Public visibility is a separate decision after the private preview has been installed and reviewed.
+- The release contains the installer and its checksum file, not a dump of the development directory.
 
 ## 1. Inspect the workspace
 
@@ -17,7 +16,7 @@ git status --short --untracked-files=all
 npm ci
 ```
 
-Confirm that the working tree contains no `.env`, key/certificate file, database, WAL/SHM sidecar, companion save, log, `node_modules/`, or build output intended for release.
+Confirm that the working tree contains no `.env`, key or certificate file, database, WAL/SHM sidecar, companion save, log, `node_modules/`, or build output intended for release.
 
 ## 2. Run the quality gates
 
@@ -31,7 +30,7 @@ The audit must finish with no findings. If a finding names a personal path or se
 
 ## 3. Build the Windows artifacts
 
-Close all running instances of PokeTokenBar Windows Lab before building:
+Close all running instances of PokeTokenBar before building:
 
 ```shell
 npm run dist
@@ -48,7 +47,7 @@ Verify the packaged output:
 node scripts/audit-release.cjs dist/win-unpacked
 ```
 
-The packaged audit must also finish with no findings. Inspect the package file list and confirm that no `companion-state.json`, Hermes database, provider log, `.env`, key, or diagnostic directory is present.
+The packaged audit must finish with no findings. Inspect the package file list and confirm that no `companion-state.json`, Hermes database, provider log, `.env`, key, or diagnostic directory is present.
 
 ## 4. Create the checksum
 
@@ -78,35 +77,35 @@ Launch the unpacked executable or installer in a clean test profile. Confirm:
 - settings persist only in the app's own local-data directory;
 - provider reads remain read-only;
 - no diagnostic CDP port or temporary test process remains active;
-- no personal values appear in the screenshots or release notes.
+- no personal values appear in screenshots or release notes.
 
-Use synthetic fixture data for screenshots and restore/remove that profile before the release is committed.
+Use synthetic fixture data for screenshots and restore or remove that profile before the release is committed.
 
-## 6. Prepare the private GitHub release
+## 6. Prepare the GitHub release
 
 Repository: <https://github.com/MarkusSela/PokeTokenBarWindows-Lab>
 
-Recommended private-preview assets:
+Release assets:
 
 - `PokeTokenBar-Windows-Lab-Setup-0.1.0.exe`
 - `SHA256SUMS.txt`
 
-Recommended tag and title:
+Release metadata:
 
 - tag: `v0.1.0`
-- title: `PokeTokenBar Windows Lab v0.1.0 — private preview`
+- title: `PokeTokenBar v0.1.0`
 
 The release body should contain:
 
 - a short feature summary;
-- exact test/audit result;
-- Windows version and architecture tested;
-- unsigned-installer/SmartScreen warning;
+- the exact test and audit result;
+- the Windows version and architecture tested;
+- the unsigned-installer and SmartScreen warning;
 - checksum verification instructions;
-- a reminder that the repository is private and that no personal data is included.
+- a reminder that release assets contain no personal data.
 
-Do not upload screenshots from a personal desktop, state exports, logs, databases, or any credential-bearing file. Documentation screenshots belong in `docs/images/` and must be synthetic.
+Do not upload screenshots from a personal desktop, state exports, logs, databases, or credential-bearing files. Documentation screenshots belong in `docs/images/` and must be synthetic.
 
-## 7. Final review before visibility changes
+## 7. Final review
 
-After installation, inspect the repository and release from a second clean view. Only after the private preview is approved should the repository visibility and release visibility be reconsidered. Making the repository public is not part of the private-preview procedure.
+Inspect the repository, release assets, and installer from a second clean view. Confirm that the version number is consistent across `package.json`, `CHANGELOG.md`, the release tag, and the installer name. Confirm that the release contains only the intended files before distributing it.
