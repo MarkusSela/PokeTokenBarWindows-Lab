@@ -47,6 +47,17 @@ test('README screenshot table references only existing documentation images', ()
   }
 });
 
+test('README uses the supplied animated Home screenshot', () => {
+  const readme = read('README.md');
+  const homeGif = path.join(root, 'docs/images/screenshot-home.gif');
+  const homePng = path.join(root, 'docs/images/screenshot-home.png');
+
+  assert.match(readme, /src="docs\/images\/screenshot-home\.gif"/);
+  assert.match(readme, /The place to start\./);
+  assert.equal(fs.existsSync(homeGif), true);
+  assert.equal(fs.existsSync(homePng), false);
+});
+
 test('README pairs every visual preview with an explanation and groups Settings previews', () => {
   const readme = read('README.md');
   const rows = [...readme.matchAll(/<tr>[\s\S]*?<\/tr>/g)].map((match) => match[0]);

@@ -57,7 +57,7 @@ The screenshots below use synthetic values and neutral demo paths. Each image si
   <tbody>
     <tr>
       <td align="center">
-        <img src="docs/images/screenshot-home.png" width="330" alt="Home panel with synthetic usage and companion progress"><br>
+        <img src="docs/images/screenshot-home.gif" width="300" alt="Animated Home panel with synthetic usage and companion progress"><br>
         <strong>🏠 Home</strong>
       </td>
       <td class="screenshot-explanation">

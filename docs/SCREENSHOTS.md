@@ -6,7 +6,7 @@ This page documents the images used by the release README. Each screenshot is pa
 
 | Screenshot | Feature | Description | Data policy |
 | --- | --- | --- | --- |
-| `screenshot-home.png` | Home | The compact Home panel combines the active companion, progress, daily and period usage, provider details, and the limits status. | Synthetic rows, totals, and companion progress only. |
+| `screenshot-home.gif` | Home | The animated Home panel combines the active companion, progress, daily and period usage, provider details, and the limits status. | Synthetic rows, totals, and companion progress only. |
 | `tray-and-popover.png` | Tray access | The notification-area icon opens Home without a separate taskbar button. Closing Home leaves the app resident in the tray. | Neutral illustration with no unrelated tray icons, clock, notifications, or personal app names. |
 | `screenshot-shop.png` | Shop | Usage progress can be exchanged for optional eggs, Rare Candy, Mint, and Shiny Charm items. | Demonstration prices only. No wallet, billing, or account balance. |
 | `screenshot-bag.png` | Bag | The local inventory shows purchased items and the explicit actions available for the active companion. | Synthetic item counts only. |
