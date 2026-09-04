@@ -13,6 +13,19 @@
   <a href="https://github.com/MarkusSela/PokeTokenBarWindows-Lab/actions/workflows/ci.yml"><img src="https://github.com/MarkusSela/PokeTokenBarWindows-Lab/actions/workflows/ci.yml/badge.svg" alt="Build status"></a>
   <a href="https://github.com/MarkusSela/PokeTokenBarWindows-Lab/releases"><img src="https://img.shields.io/github/v/release/MarkusSela/PokeTokenBarWindows-Lab?display_name=tag&label=release" alt="Latest release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2ea44f" alt="MIT license"></a>
+  <a href="https://ko-fi.com/marukoshi"><img src="https://img.shields.io/badge/Support%20on-Ko--fi-ff5e5b?logo=ko-fi&logoColor=white" alt="Support on Ko-fi"></a>
+</p>
+
+<p align="center" aria-label="Language selector">
+  <a href="README.md">🇬🇧 <strong>English</strong></a>
+  &nbsp;|&nbsp;
+  <a href="README.zh-CN.md">🇨🇳 简体中文</a>
+  &nbsp;|&nbsp;
+  <a href="README.it.md">🇮🇹 Italiano</a>
+  &nbsp;|&nbsp;
+  <a href="README.ja.md">🇯🇵 日本語</a>
+  &nbsp;|&nbsp;
+  <a href="README.ko.md">🇰🇷 한국어</a>
 </p>
 
 > **Current release: v0.1.1**
@@ -228,10 +241,6 @@ npm run dist
 The installer is written to `dist/PokeTokenBar-Windows-Lab-Setup-<version>.exe`. The unpacked application is written to `dist/win-unpacked/`.
 
 For a clean verification run, close previous PokeTokenBar processes before rebuilding. The normal launch path stays tray-first; diagnostic opening is reserved for the documented `PTB_OPEN=1` test path.
-
-Cross-platform development is documented in [`docs/LINUX-WEB-DOCKER.md`](docs/LINUX-WEB-DOCKER.md). It covers the Linux AppImage/deb targets, the local browser Home, the read-only API boundary, Wayland fallbacks, and the headless Docker profile.
-
-For the Docker server, the supplied Compose profile binds to loopback and starts in `public-readonly` mode. It reads Hermes from an explicit read-only directory and stores companion progression in a separate `/data` bind. See the Docker section for the host-directory permissions, LAN/Homepage read-only setup, and the explicit loopback-only mutation opt-in.
 
 ## 🤝 Contributing
 

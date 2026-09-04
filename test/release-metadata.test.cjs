@@ -36,6 +36,32 @@ test('release metadata uses the final release identity and project links', () =>
   assert.doesNotMatch(readme, /Support future ports|future companion ports/i);
 });
 
+test('README language selector and support badge point to local documents', () => {
+  const documents = [
+    ['README.md', 'English'],
+    ['README.zh-CN.md', '简体中文'],
+    ['README.it.md', 'Italiano'],
+    ['README.ja.md', '日本語'],
+    ['README.ko.md', '한국어'],
+  ];
+
+  for (const [documentName, languageLabel] of documents) {
+    const documentPath = path.join(root, documentName);
+    assert.equal(fs.existsSync(documentPath), true, `${languageLabel} README is missing`);
+    const document = read(documentName);
+    assert.match(document, /aria-label="Language selector"/, `${documentName} has no language selector`);
+    assert.ok(document.includes('https://ko-fi.com/marukoshi'), `${documentName} is missing the Ko-fi link`);
+    assert.ok(document.includes('img.shields.io/badge/Support%20on-Ko--fi-ff5e5b?logo=ko-fi&logoColor=white'), `${documentName} is missing the Ko-fi badge`);
+    assert.equal((document.match(/&nbsp;\|&nbsp;/g) || []).length, 4, `${documentName} has an incomplete language row`);
+    for (const [targetName, targetLabel] of documents) {
+      assert.ok(document.includes(`href="${targetName}"`), `${documentName} is missing ${targetLabel} link`);
+    }
+  }
+
+  const english = read('README.md');
+  assert.ok(english.indexOf('href="README.md"') < english.indexOf('href="README.zh-CN.md"'));
+});
+
 test('Windows packaging never triggers implicit GitHub publishing', () => {
   const packageJson = JSON.parse(read('package.json'));
 
