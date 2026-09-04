@@ -10,9 +10,11 @@ const {
   dialog,
   shell,
 } = require("electron");
-const https = require("https");
-app.setName("PokeTokenBar Windows Lab");
-app.setAppUserModelId("com.poketokenbar.windows.lab");
+const isLinuxPlatform = process.platform === "linux";
+app.setName(isLinuxPlatform ? "PokeTokenBar" : "PokeTokenBar Windows Lab");
+app.setAppUserModelId(
+  isLinuxPlatform ? "com.poketokenbar.desktop" : "com.poketokenbar.windows.lab",
+);
 const path = require("path");
 const {
   Game,
@@ -22,6 +24,7 @@ const {
   eggTokensToHatch,
 } = require("./core/game.cjs");
 const { loadState, saveState } = require("./core/state-store.cjs");
+const { cloneExportState } = require("./core/local-service.cjs");
 const { readHermesUsage } = require("./core/hermes-usage.cjs");
 const { readLocalProviderUsage } = require("./core/provider-usage.cjs");
 const { scanAdditionalFolders } = require("./core/local-scan.cjs");
@@ -35,10 +38,16 @@ const {
 const { shouldHidePopoverOnBlur } = require("./core/popover-focus-policy.cjs");
 const { publishSnapshot } = require("./core/live-update.cjs");
 const { clampPopoverHeight, MIN_POPOVER_HEIGHT } = require("./core/popover-size.cjs");
+const {
+  resolvePlatformPaths,
+  resolveCompanionStateFilePath,
+} = require("./core/platform-paths.cjs");
+const { buildCapabilities } = require("./core/capabilities.cjs");
+const { checkLatestRelease: checkLatestReleaseForPlatform } = require("./core/release-check.cjs");
+const { syncAutostart } = require("./core/linux-autostart.cjs");
 let win,
   tray,
  petWin,
- goldWin,
  petController,
   quitting = false,
   refreshTimer = null,
@@ -50,13 +59,32 @@ let win,
 const POPOVER_WIDTH = 360;
 const diagnosticOpen =
   process.argv.includes("--open") || process.env.PTB_OPEN === "1";
+const desktopCapabilities = buildCapabilities({
+  mode: "desktop-local",
+  platform: process.platform,
+  env: process.env,
+  notificationAvailable: Notification.isSupported?.() !== false,
+});
 const isPrimaryInstance = app.requestSingleInstanceLock();
 if (!isPrimaryInstance) app.quit();
 const LAB_DATA_DIR = "PokeTokenBarWindows-Lab";
 function stateFile() {
-  const override = String(process.env.PTB_STATE_DIR || "").trim();
-  const dir = override || path.join(app.getPath("appData"), LAB_DATA_DIR);
-  return path.join(dir, "companion-state.json");
+  if (isLinuxPlatform)
+    return resolveCompanionStateFilePath({ platform: "linux", env: process.env });
+  return resolveCompanionStateFilePath({
+    platform: "win32",
+    env: process.env,
+    fallbackDir: path.join(app.getPath("appData"), LAB_DATA_DIR),
+  });
+}
+function syncLinuxAutostart() {
+  if (!isLinuxPlatform) return;
+  const paths = resolvePlatformPaths({ platform: "linux", env: process.env });
+  syncAutostart({
+    configHome: paths.configHome,
+    execPath: app.getPath("exe"),
+    enabled: Boolean(game?.state?.settings?.launchAtLogin),
+  });
 }
 let game, api;
 function icon() {
@@ -153,55 +181,10 @@ function updateTrayTooltip(usage) {
       : `PokeTokenBar${name ? ` — ${name}` : ""}`,
   );
 }
-function compareVersions(left, right) {
-  const parse = (value) => {
-    const match = String(value || "")
-      .trim()
-      .replace(/^v/i, "")
-      .match(/^(\d+)\.(\d+)\.(\d+)/);
-    return match ? match.slice(1).map(Number) : null;
-  };
-  const a = parse(left),
-    b = parse(right);
-  if (!a || !b) return 0;
-  for (let index = 0; index < a.length; index++)
-    if (a[index] !== b[index]) return a[index] > b[index] ? 1 : -1;
-  return 0;
-}
-function isWindowsInstaller(asset) {
-  return /\.exe$|\.msi$/i.test(String(asset?.name || ""));
-}
 async function checkLatestRelease() {
-  return new Promise((resolve) => {
-    const request = https.get("https://api.github.com/repos/MarkusSela/PokeTokenBarWindows-Lab/releases/latest", { headers: { "User-Agent": "PokeTokenBar-Windows-Lab" } }, (response) => {
-      const chunks = [];
-      response.on("data", (chunk) => chunks.push(chunk));
-      response.on("end", () => {
-        if (response.statusCode !== 200) { resolve({ ok: false, error: `HTTP ${response.statusCode}` }); return; }
-        try {
-          const payload = JSON.parse(Buffer.concat(chunks).toString("utf8"));
-          const latestTag = String(payload.tag_name || payload.name || "").replace(/^v/i, "");
-          const windowsAsset = Array.isArray(payload.assets)
-            ? payload.assets.find(isWindowsInstaller)
-            : null;
-          const currentVersion = app.getVersion();
-          resolve({
-            ok: Boolean(latestTag),
-            currentVersion,
-            latestVersion: latestTag || null,
-            url: payload.html_url || null,
-            assetUrl: windowsAsset?.browser_download_url || null,
-            windowsAsset: windowsAsset?.name || null,
-            windowsReleaseAvailable: Boolean(windowsAsset),
-            updateAvailable: Boolean(
-              windowsAsset && compareVersions(latestTag, currentVersion) > 0,
-            ),
-          });
-        } catch { resolve({ ok: false, error: "Invalid release response" }); }
-      });
-    });
-    request.setTimeout(5000, () => { request.destroy(); resolve({ ok: false, error: "Update check timeout" }); });
-    request.on("error", () => resolve({ ok: false, error: "Update check unavailable" }));
+  return checkLatestReleaseForPlatform({
+    currentVersion: app.getVersion(),
+    platform: process.platform,
   });
 }
 function validExternalUrl(value) {
@@ -276,6 +259,9 @@ function snapshot(extra = {}) {
     extra.usage?.limitWindows ?? lastUsage?.limitWindows,
   );
   return {
+    mode: "desktop-local",
+    readOnly: false,
+    capabilities: desktopCapabilities,
     ...extra,
     ...(extra.usage ? { usage: visibleUsage } : {}),
     state: game.state,
@@ -391,14 +377,17 @@ async function refresh(effect = null) {
     if (!game.state.active && game.state.eggUsage >= BALANCE.eggHatch) {
       api ??= new PokeApi(path.join(app.getPath("userData"), "pokeapi-cache"));
       game.setCatalog(await api.baseIndex());
-      const base = game.chooseBase();
+      const isShiny = game.rollShiny();
+      const base = game.chooseBase({
+        avoidOwned: game.shouldAvoidPokeDollDuplicates(isShiny),
+      });
       if (base) {
         const line = choosePath(
           await api.line(base.id),
           game.state.collectedFinals,
           game.rng,
         );
-        game.hatchLine(line);
+        game.hatchLine(line, { isShiny });
       }
       game.setCatalog([]);
     }
@@ -486,6 +475,7 @@ function hidePopover() {
   }
 }
 function createWindow() {
+  if (win && win.isDestroyed()) win = null;
   if (win) {
     placePopover();
     win.show();
@@ -499,7 +489,7 @@ function createWindow() {
     icon: icon(),
     show: false,
     frame: false,
-    skipTaskbar: true,
+    skipTaskbar: Boolean(desktopCapabilities.tray),
     resizable: false,
     hasShadow: true,
     backgroundColor: "#1a1a1a",
@@ -517,6 +507,7 @@ function createWindow() {
     win.webContents.send("popover-opened");
   });
   win.on("blur", () => {
+    if (!desktopCapabilities.tray) return;
     clearTimeout(blurTimer);
     blurTimer = setTimeout(() => {
       if (!win || win.isDestroyed()) return;
@@ -534,10 +525,13 @@ function createWindow() {
     blurTimer = null;
   });
   win.on("close", (event) => {
-    if (!quitting) {
+    if (!quitting && desktopCapabilities.tray) {
       event.preventDefault();
       hidePopover();
     }
+  });
+  win.on("closed", () => {
+    win = null;
   });
 }
 function placeFloatingPet() {
@@ -586,10 +580,15 @@ function petData() {
   };
 }
 function createFloatingPet() {
-  if (petWin) {
+  if (petWin && !petWin.isDestroyed()) {
     petWin.show();
     petWin.webContents.send("pet-updated", petData());
     return;
+  }
+  if (petWin?.isDestroyed()) {
+    petWin = null;
+    petController?.cancelDrag();
+    petController = null;
   }
   const size = Number(game?.state?.settings?.floatingPetSize || 96);
   const created = new BrowserWindow({
@@ -631,6 +630,14 @@ function createFloatingPet() {
   });
 }
 function syncFloatingPet() {
+  if (!desktopCapabilities.floatingPet) {
+    const closing = petWin;
+    petWin = null;
+    petController?.cancelDrag();
+    petController = null;
+    closing?.close();
+    return;
+  }
   if (!game?.state?.settings?.showFloatingPet) {
     const closing = petWin;
     petWin = null;
@@ -643,63 +650,6 @@ function syncFloatingPet() {
   else {
     petWin.show();
     petWin.webContents.send("pet-updated", petData());
-  }
-}
-function goldConfig() {
-  return {
-    enabled: Boolean(game?.state?.settings?.showGoldWalking),
-    size: Number(game?.state?.settings?.goldWalkingSize || 76),
-  };
-}
-function goldOverlayBounds() {
-  const area = virtualWorkArea();
-  return { x: area.x, y: area.y, width: area.width, height: area.height };
-}
-function createGoldWalkingWindow() {
-  if (goldWin && !goldWin.isDestroyed()) return;
-  const created = new BrowserWindow({
-    ...goldOverlayBounds(),
-    show: false,
-    frame: false,
-    transparent: true,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    focusable: false,
-    resizable: false,
-    hasShadow: false,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.cjs"),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  });
-  created.setIgnoreMouseEvents(true, { forward: true });
-  goldWin = created;
-  created.loadFile("gold.html");
-  created.once("ready-to-show", () => {
-    if (created.isDestroyed()) return;
-    created.setBounds(goldOverlayBounds());
-    created.webContents.send("gold-config", goldConfig());
-    if (game?.state?.settings?.showGoldWalking) created.showInactive();
-  });
-  created.on("closed", () => {
-    if (goldWin === created) goldWin = null;
-  });
-}
-function syncGoldWalking() {
-  const enabled = Boolean(game?.state?.settings?.showGoldWalking);
-  if (!enabled) {
-    if (goldWin && !goldWin.isDestroyed()) {
-      goldWin.webContents.send("gold-config", goldConfig());
-      goldWin.hide();
-    }
-    return;
-  }
-  createGoldWalkingWindow();
-  if (goldWin && !goldWin.isDestroyed()) {
-    goldWin.setBounds(goldOverlayBounds());
-    goldWin.webContents.send("gold-config", goldConfig());
-    goldWin.showInactive();
   }
 }
 ipcMain.on("pet-drag-start", (_event, { x, y }) =>
@@ -738,19 +688,27 @@ app.whenReady().then(() => {
   game = new Game({ state: loadState(stateFile()), catalog: [] });
   liveUsageDisplay = new LiveUsageDisplay(game.state.liveUsageDisplay);
   lastRefreshAt = Number(game.state.lastRefreshAt || 0);
-  app.setLoginItemSettings({
-    openAtLogin: Boolean(game.state.settings.launchAtLogin),
-  });
-  tray = new Tray(icon());
-  tray.setToolTip("PokeTokenBar");
-  tray.on("click", () =>
-    win?.isVisible() ? hidePopover() : createWindow(),
-  );
+  if (isLinuxPlatform) syncLinuxAutostart();
+  else
+    app.setLoginItemSettings({
+      openAtLogin: Boolean(game.state.settings.launchAtLogin),
+    });
+  if (desktopCapabilities.tray) {
+    try {
+      tray = new Tray(icon());
+      tray.setToolTip("PokeTokenBar");
+      tray.on("click", () =>
+        win?.isVisible() ? hidePopover() : createWindow(),
+      );
+    } catch {
+      tray = null;
+      desktopCapabilities.tray = false;
+      desktopCapabilities.companionFallback = "home";
+    }
+  }
   const realignDisplayWindows = () => {
     if (win && !win.isDestroyed() && win.isVisible()) placePopover();
     if (petWin && !petWin.isDestroyed()) placeFloatingPet();
-    if (goldWin && !goldWin.isDestroyed())
-      goldWin.setBounds(goldOverlayBounds());
   };
   for (const event of [
     "display-added",
@@ -759,7 +717,6 @@ app.whenReady().then(() => {
   ])
     screen.on(event, realignDisplayWindows);
   rebuildTrayMenu();
-  syncGoldWalking();
   ipcMain.on("popover-content-height", (_event, height) => {
     resizePopoverHeight(height);
   });
@@ -767,6 +724,7 @@ app.whenReady().then(() => {
   ipcMain.handle("action", async (_, { type, value }) => {
     let ok = false;
     if (type === "buy") ok = game.buyItem(value);
+    if (type === "pokedoll") ok = game.activatePokeDoll();
     if (type === "candy") ok = game.useRareCandy();
     if (type === "mint") ok = game.useMint();
     if (type === "egg") ok = game.buyEgg(value ?? null);
@@ -776,17 +734,17 @@ app.whenReady().then(() => {
         petController?.setSize(game.state.settings.floatingPetSize);
         placeFloatingPet();
       }
-      if (value.key === "showGoldWalking" || value.key === "goldWalkingSize")
-        syncGoldWalking();
       save();
       return { ok: true };
     }
     if (type === "setting" && value && typeof value.key === "string") {
       game.updateSetting(value.key, value.value);
       if (value.key === "launchAtLogin")
-        app.setLoginItemSettings({
-          openAtLogin: game.state.settings.launchAtLogin,
-        });
+        if (isLinuxPlatform) syncLinuxAutostart();
+        else
+          app.setLoginItemSettings({
+            openAtLogin: game.state.settings.launchAtLogin,
+          });
       if (value.key === "language") rebuildTrayMenu();
       if (value.key === "floatingPetSize" && petWin && !petWin.isDestroyed()) {
         petController?.setSize(game.state.settings.floatingPetSize);
@@ -794,7 +752,6 @@ app.whenReady().then(() => {
       }
       scheduleRefresh();
       syncFloatingPet();
-      syncGoldWalking();
       ok = true;
     }
     if (type === "check-update") {
@@ -848,7 +805,7 @@ app.whenReady().then(() => {
       });
       if (result.canceled || !result.filePath)
         return { ...snapshot(), ok: false };
-      saveState(result.filePath, game.state);
+      saveState(result.filePath, cloneExportState(game.state));
       return { ...snapshot(), ok: true };
     }
     if (type === "import-save") {
@@ -870,7 +827,6 @@ app.whenReady().then(() => {
         return { ...snapshot(), ok: false, error: "Invalid companion save" };
       game = new Game({ state: imported, catalog: [] });
       liveUsageDisplay = new LiveUsageDisplay(game.state.liveUsageDisplay);
-      syncGoldWalking();
       save();
       scheduleRefresh();
       return { ...(await refresh()), ok: true };
@@ -894,14 +850,16 @@ app.whenReady().then(() => {
       if (update.updateAvailable)
         notifyUser(
           "PokeTokenBar update",
-          `Windows release ${update.latestVersion} is available.`,
+          `PokeTokenBar release ${update.latestVersion} is available.`,
         );
     });
-  if (diagnosticOpen) createWindow();
+  if (diagnosticOpen || !tray) createWindow();
 });
-app.on("window-all-closed", (e) => e.preventDefault());
+app.on("window-all-closed", (e) => {
+  if (desktopCapabilities.tray) e.preventDefault();
+  else quitting = true;
+});
 app.on("before-quit", () => {
   quitting = true;
   if (refreshTimer) clearInterval(refreshTimer);
-  if (goldWin && !goldWin.isDestroyed()) goldWin.destroy();
 });

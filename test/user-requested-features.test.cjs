@@ -88,7 +88,7 @@ test('Catch log does not render rarity badges', () => {
 
 test('settings hide optional sliders while their feature toggle is disabled', () => {
   assert.match(html, /\$\{s\.showFloatingPet\?`<div class="setting">[\s\S]*?floatingPetSize/);
-  assert.match(html, /\$\{s\.showGoldWalking\?`<div class="setting">[\s\S]*?goldWalkingSize/);
+
 });
 
 test('popover height leaves a safety margin below the usable work area', () => {

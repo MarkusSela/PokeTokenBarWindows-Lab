@@ -1,10 +1,11 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { DEFAULT_SETTINGS, normalizeSettings, updateSetting } = require('../core/settings.cjs');
+const { normalizeState } = require('../core/game.cjs');
 
 const toggleKeys = [
   'launchAtLogin', 'menuTodayTokens', 'menuTodayCost', 'menuLimitPercent',
-  'showFloatingPet', 'showGoldWalking', 'notificationsBubbles', 'limitAlerts', 'companionEvents',
+  'showFloatingPet', 'notificationsBubbles', 'limitAlerts', 'companionEvents',
   'providerStatus', 'keychainOptOut',
 ];
 
@@ -32,6 +33,16 @@ test('all settings sliders clamp safely at their documented bounds', () => {
   assert.equal(updateSetting(DEFAULT_SETTINGS, 'criticalPercent', 120).criticalPercent, 100);
   assert.equal(updateSetting(DEFAULT_SETTINGS, 'floatingPetSize', 1).floatingPetSize, 48);
   assert.equal(updateSetting(DEFAULT_SETTINGS, 'floatingPetSize', 999).floatingPetSize, 256);
-  assert.equal(updateSetting(DEFAULT_SETTINGS, 'goldWalkingSize', 1).goldWalkingSize, 24);
-  assert.equal(updateSetting(DEFAULT_SETTINGS, 'goldWalkingSize', 999).goldWalkingSize, 128);
+
+});
+
+test('legacy Gold walking settings are dropped during normalization', () => {
+  const normalized = normalizeSettings({ showGoldWalking: true, goldWalkingSize: 128 });
+  assert.equal('showGoldWalking' in normalized, false);
+  assert.equal('goldWalkingSize' in normalized, false);
+});
+
+test('English is the primary language for a new or legacy state without a language', () => {
+  assert.equal(DEFAULT_SETTINGS.language, 'en');
+  assert.equal(normalizeState({}).language, 'en');
 });

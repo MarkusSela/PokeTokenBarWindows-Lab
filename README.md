@@ -2,7 +2,7 @@
   <img src="assets/app-icon.png" width="144" alt="PokeTokenBar app icon">
 </p>
 
-<h1 align="center">PokeTokenBar for Win</h1>
+<h1 align="center">PokeTokenBar</h1>
 
 <p align="center">
   <strong>Turn local AI coding usage into Pokémon progress.</strong><br>
@@ -15,7 +15,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2ea44f" alt="MIT license"></a>
 </p>
 
-> **Current release: v0.1.0**
+> **Current release: v0.1.1**
 
 ## About this project
 
@@ -28,7 +28,7 @@ The app stays in the notification area and opens a compact Home panel when you n
 - 🥚 **Turns usage into progress:** local usage feeds the active egg, which can hatch, evolve, and graduate.
 - 📊 **Shows the numbers that matter:** see daily, weekly, monthly, and rolling usage when the source provides it.
 - 📚 **Builds a collection:** keep graduated companions in the Pokédex and review each individual in the Catch Log.
-- 🛍️ **Adds a small reward loop:** use the Shop and Bag for eggs, Rare Candy, Mints, and other progression items.
+- 🛍️ **Adds a small reward loop:** use the Shop and Bag for eggs, Rare Candy, Mints, Shiny Charm, and the consumable Poké Doll.
 - 🫧 **Stays out of the way:** open Home from the tray or keep an optional floating companion on screen without adding another taskbar button.
 - 📁 **Accepts extra local sources:** add JSON or JSONL folders when a tool stores usage outside the built-in locations.
 - 🔒 **Keeps the boundary clear:** provider data is read-only, and the app does not need a server, SSH, Tailscale, Home Assistant, or a remote usage service.
@@ -37,11 +37,15 @@ The app stays in the notification area and opens a compact Home panel when you n
 
 1. The app reads supported usage metadata locally.
 2. New usage advances the active egg.
-3. The egg hatches into a Pokémon selected from the built-in catalogue.
+3. At the hatch decision point, the egg selects a Pokémon from the built-in catalogue.
 4. More progress unlocks evolution stages and eventually graduates the companion.
 5. The Pokédex and Catch Log keep the local collection history.
 
 The progression state belongs to PokeTokenBar. It does not write back to Hermes or to any provider source.
+
+### Poké Doll
+
+The Poké Doll is a consumable Shop item priced at **250,000,000 tokens**. Activate it from the Bag when an egg is incubating and it stays armed until the next hatch. At that decision point, normal Pokémon species already represented in the Pokédex are excluded; shiny variants remain valid, so owning Charmander does not block Charmander shiny. The Doll affects only the next hatch and never changes the active Pokémon or the egg progress.
 
 ## 📸 Screenshots
 
@@ -77,22 +81,22 @@ The screenshots below use synthetic values and neutral demo paths. Each image si
     </tr>
     <tr>
       <td align="center">
-        <img src="docs/images/screenshot-shop.png" width="275" alt="Shop with synthetic progression item prices"><br>
+        <img src="docs/images/screenshot-shop.png" width="275" alt="Shop with synthetic progression item prices including Poké Doll"><br>
         <strong>🛍️ Shop</strong>
       </td>
       <td class="screenshot-explanation">
         <strong>A place to spend progression tokens.</strong><br>
-        Shop offers optional items such as a fresh egg, Rare Egg, Mint, Rare Candy, and Shiny Charm. Prices in the screenshot are demonstration values, not billing data or an account wallet.
+        Shop offers optional items such as a fresh egg, Rare Egg, the Mint with its supplied local leaf icon, Rare Candy, Shiny Charm, and Poké Doll. The Poké Doll costs 250,000,000 tokens and is consumed when armed for the next hatch. Prices and the wallet in the screenshot are synthetic demonstration values, not billing data or an account wallet.
       </td>
     </tr>
     <tr>
       <td align="center">
-        <img src="docs/images/screenshot-bag.png" width="275" alt="Bag with synthetic Rare Candy and Mint inventory"><br>
+        <img src="docs/images/screenshot-bag.png" width="275" alt="Bag with synthetic Rare Candy, Mint, and Poké Doll inventory"><br>
         <strong>🎒 Bag</strong>
       </td>
       <td class="screenshot-explanation">
         <strong>Use what you have earned.</strong><br>
-        Bag keeps the local item inventory in view and makes each action explicit. The counts shown here are synthetic and do not represent a real purchase history.
+        Bag keeps the local item inventory in view, including the supplied Mint leaf icon, and makes each action explicit. The Poké Doll can be armed here for the next hatch; the counts and activation state shown here are synthetic and do not represent a real purchase history.
       </td>
     </tr>
     <tr>
@@ -126,7 +130,7 @@ The screenshots below use synthetic values and neutral demo paths. Each image si
         <ul>
           <li><strong>General:</strong> choose the language, refresh cadence, limit display, launch-at-login behavior, and representative Pokémon.</li>
           <li><strong>Tray:</strong> decide which daily totals and limit details appear in the tray tooltip.</li>
-          <li><strong>Companion:</strong> show or hide the floating pet, adjust its size, and enable the optional Gold walking overlay.</li>
+          <li><strong>Companion:</strong> show or hide the floating pet and adjust its size.</li>
           <li><strong>Updates:</strong> choose whether to receive update notices and check the release page.</li>
           <li><strong>Advanced scan:</strong> add extra JSON or JSONL folders. The `C:\Demo\AI-Logs` path is a synthetic example; these folders are read-only.</li>
         </ul>
@@ -153,16 +157,7 @@ The screenshots below use synthetic values and neutral demo paths. Each image si
         This banner shows how the app presents a shiny companion and its notification moment. It is a static, synthetic documentation state.
       </td>
     </tr>
-    <tr>
-      <td align="center">
-        <img src="assets/gold-companion-walking.gif" width="275" alt="Optional Gold walking overlay"><br>
-        <strong>🚶 Gold walking overlay</strong>
-      </td>
-      <td class="screenshot-explanation">
-        <strong>An optional ambient animation.</strong><br>
-        Gold and his Pokémon can cross the screen independently from Home. The overlay is opt-in, has its own size control, and remains outside the taskbar.
-      </td>
-    </tr>
+
   </tbody>
 </table>
 
@@ -205,7 +200,7 @@ The release audit rejects personal absolute paths, credential-looking values, lo
 
 ## 📦 Install
 
-The current release is `v0.1.0`.
+The current release is `v0.1.1`.
 
 1. Open the [Releases page](https://github.com/MarkusSela/PokeTokenBarWindows-Lab/releases).
 2. Download `PokeTokenBar-Windows-Lab-Setup-<version>.exe`.
@@ -233,6 +228,10 @@ npm run dist
 The installer is written to `dist/PokeTokenBar-Windows-Lab-Setup-<version>.exe`. The unpacked application is written to `dist/win-unpacked/`.
 
 For a clean verification run, close previous PokeTokenBar processes before rebuilding. The normal launch path stays tray-first; diagnostic opening is reserved for the documented `PTB_OPEN=1` test path.
+
+Cross-platform development is documented in [`docs/LINUX-WEB-DOCKER.md`](docs/LINUX-WEB-DOCKER.md). It covers the Linux AppImage/deb targets, the local browser Home, the read-only API boundary, Wayland fallbacks, and the headless Docker profile.
+
+For the Docker server, the supplied Compose profile binds to loopback and starts in `public-readonly` mode. It reads Hermes from an explicit read-only directory and stores companion progression in a separate `/data` bind. See the Docker section for the host-directory permissions, LAN/Homepage read-only setup, and the explicit loopback-only mutation opt-in.
 
 ## 🤝 Contributing
 
